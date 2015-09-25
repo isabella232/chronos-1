@@ -6,6 +6,7 @@ define([
   'underscore',
   'views/job_detail_header_view',
   'views/job_detail_stats',
+  'views/job_detail_history',
   'views/bound_view',
   'components/tooltip_view',
   'components/fuzzy_select2',
@@ -25,6 +26,7 @@ function($,
          _,
          JobDetailHeaderView,
          JobDetailStatsView,
+         JobDetailHistoryView,
          BoundView,
          TooltipView,
          FuzzySelect2,
@@ -34,11 +36,9 @@ function($,
 
   'use strict';
 
-  var JobDetailView, asyncExecutorPath, Remove;
+  var JobDetailView, Remove;
 
   var LIST_SEPARATOR = ', ';
-
-  asyncExecutorPath = '/srv/mesos/utils/async-executor.arx';
 
   Remove = BoundView.prototype.remove;
 
@@ -123,6 +123,7 @@ function($,
       this.renderHeader();
       this.renderParents();
       this.renderStats();
+      this.renderJobHistory();
       this.trigger('render');
 
       if (this.$el.hasClass('edit-job')) {
@@ -181,6 +182,22 @@ function($,
       }
       if (!view) { return; }
       return view.setElement(this.$('.stats-row')).render();
+    },
+
+    renderJobHistory: function() {
+      var view = this.jobHistoryView;
+      if (!view) {
+        try {
+          view = new JobDetailHistoryView({
+            model: this.model
+          });
+
+          this.jobHistoryView = view;
+        } catch (e) {
+        }
+      }
+      if (!view) { return; }
+      return view.setElement(this.$('.history-row')).render();
     },
 
     renderParents: function() {
@@ -369,6 +386,12 @@ function($,
           if (!$el.is(':checked')) { return; }
 
           val = (parseInt(val, 10) === 0);
+        } else if (name === 'softError') {
+            if (!$el.is(':checked')) { return; }
+
+            val = (parseInt(val, 10) !== 0);
+        } else if (name === 'highPriority') {
+          if (!$el.is(':checked')) { return; }
         }
 
         console.log("setting model", model, "name", name, "to", val);

@@ -86,7 +86,7 @@ function chronos {(
 function chronos_download {
   if [[ -d chronos ]]
   then msg "Already downloaded Chronos."
-  else github_tgz airbnb/chronos "$chronos_ref" | tgz_into chronos
+  else github_tgz mesos/chronos "$chronos_ref" | tgz_into chronos
   fi
 }
 
@@ -107,7 +107,7 @@ cat <<USAGE
         chronos /path/to/config
 USAGE
 else
-  java -cp '$prefix'/chronos/target/chronos*.jar com.airbnb.scheduler.Main"
+  java -cp '$prefix'/chronos/target/chronos*.jar org.apache.mesos.chronos.scheduler.Main"
 fi
 EOF
 chmod a+rx "$prefix"/bin/chronos

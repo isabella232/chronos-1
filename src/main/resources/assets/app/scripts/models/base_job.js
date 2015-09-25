@@ -21,12 +21,12 @@ function($, Backbone, _, moment, BaseJobValidations) {
         encoded;
 
     encoded = _.map(args, function(arg) { return encodeURIComponent(arg); });
-    encoded.unshift('');
     return encoded.join('/');
   }
 
   BaseWhiteList = [
-    'name', 'command', 'owner', 'async', 'epsilon', 'executor', 'disabled'
+    'name', 'command', 'description', 'owner', 'ownerName', 'async', 'epsilon', 'executor',
+    'disabled', 'softError', 'cpus', 'mem', 'disk', 'highPriority'
   ];
 
   BaseJobModel = Backbone.Model.extend({
@@ -50,7 +50,8 @@ function($, Backbone, _, moment, BaseJobValidations) {
         errorCount: 0,
         persisted: false,
         async: false,
-        disabled: false
+        disabled: false,
+        softError: false
       };
     },
 
@@ -95,8 +96,13 @@ function($, Backbone, _, moment, BaseJobValidations) {
         }, {});
       };
       $.getJSON(url, function(data) {
-        if (!data || !data.count) { return null; }
-        model.set({stats: formatStats(data)});
+        if (!data) { return null; }
+        if (data.histogram && data.histogram.count) {
+          model.set({stats: formatStats(data.histogram)});
+        }
+        if (data.taskStatHistory) {
+          model.set({taskStatHistory: data.taskStatHistory});
+        }
       });
     },
 
