@@ -201,13 +201,10 @@ class JobManagementResource @Inject()(val jobScheduler: JobScheduler,
   @Timed
   def list(): Response = {
     try {
-      val jobs = ListBuffer[BaseJob]()
       import scala.collection.JavaConversions._
-      jobGraph.dag.vertexSet().map({
-        job =>
-          jobs += jobGraph.getJobForName(job).get
-      })
-      Response.ok(jobs.toList).build
+
+      val jobs = jobGraph.dag.vertexSet().flatMap(jobGraph.getJobForName)
+      Response.ok(jobs.map(JobUtils.convertStoredToJob).toList).build
     } catch {
       case ex: Exception =>
         log.log(Level.WARNING, "Exception while serving request", ex)
@@ -258,7 +255,7 @@ class JobManagementResource @Inject()(val jobScheduler: JobScheduler,
           // Maybe add some other query parameters?
           valid
       }.toList.slice(_offset, _offset + _limit)
-      Response.ok(filteredJobs).build
+      Response.ok(filteredJobs.map(JobUtils.convertStoredToJob)).build
     } catch {
       case ex: Exception =>
         log.log(Level.WARNING, "Exception while serving request", ex)

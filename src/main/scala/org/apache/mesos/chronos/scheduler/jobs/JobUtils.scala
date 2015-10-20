@@ -49,6 +49,7 @@ object JobUtils {
       Schedule.parse(j.schedule, j.scheduleTimeZone) map { parsedSched =>
         InternalScheduleBasedJob(
           parsedSched,
+          scheduleTimeZone = j.scheduleTimeZone,
           name = j.name,
           command = j.command,
           epsilon = j.epsilon,
@@ -91,6 +92,7 @@ object JobUtils {
   def convertInternalScheduleToExternalScheduled(j: InternalScheduleBasedJob): ScheduleBasedJob = {
     ScheduleBasedJob(
       schedule = j.scheduleData.toZeroOffsetISO8601Representation,
+      scheduleTimeZone = j.scheduleTimeZone,
       name = j.name,
       command = j.command,
       epsilon = j.epsilon,
